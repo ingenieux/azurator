@@ -36,6 +36,9 @@ import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 
 @Mojo(name = "fast-deploy", defaultPhase = LifecyclePhase.NONE)
 public class AzuratorGitDeployMojo extends AbstractMojo implements Contextualizable {
+  private static final String AZURE_ENDPOINT = "https://%s.scm.azurewebsites.net:443/%s.git";
+  private static final String CHINA_CLOUD_ENDPOINT= "https://%s.scm.chinacloudsites.cn:443/%s.git";
+
   public class MavenSettingsCredentialsProvider extends UsernamePasswordCredentialsProvider {
     public MavenSettingsCredentialsProvider(Server server) {
       super(server.getUsername(), server.getPassword().toCharArray());
@@ -79,6 +82,9 @@ public class AzuratorGitDeployMojo extends AbstractMojo implements Contextualiza
    */
   @Parameter(property = "azurator.versionDescription", defaultValue = "Update from fast-deploy")
   String versionDescription;
+
+  @Parameter(property = "azurator.deployToChinaCloud", defaultValue = "false")
+  boolean deployToChinaCloud;
 
   public void execute() throws MojoExecutionException, MojoFailureException {
     try {
@@ -179,9 +185,8 @@ public class AzuratorGitDeployMojo extends AbstractMojo implements Contextualiza
         return server;
     return null;
   }
-
   private String getRemoteEndpoint() throws Exception {
-    return String.format("https://%s.scm.azurewebsites.net:443/%s.git", this.applicationName, this.applicationName);
+    return String.format(deployToChinaCloud?CHINA_CLOUD_ENDPOINT:AZURE_ENDPOINT, this.applicationName, this.applicationName);
   }
 
   private Server getServer() throws ComponentLookupException {
